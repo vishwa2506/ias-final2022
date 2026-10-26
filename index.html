@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT3070 (2022) - Information Assurance & Security Quiz</title>
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Sinhala', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background-color: #f1f5f9;
+        color: #1e293b;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    #quiz-container {
+        background-color: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        width: 100%;
+        max-width: 900px;
+        overflow: hidden;
+    }
+    #header {
+        background: linear-gradient(135deg, #0f172a, #2563eb);
+        color: white;
+        padding: 24px;
+        text-align: center;
+    }
+    h2 {
+        margin: 0 0 10px 0;
+        font-size: 1.5em;
+        letter-spacing: 0.5px;
+    }
+    #timer {
+        font-size: 1.35em;
+        font-weight: bold;
+        color: #fff;
+        background-color: rgba(255,255,255,0.18);
+        padding: 5px 15px;
+        border-radius: 6px;
+        display: inline-block;
+        letter-spacing: 2px;
+    }
+    #question-area {
+        padding: 25px 30px;
+    }
+    .badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+    }
+    .badge-single { background-color: #e0f2fe; color: #0369a1; }
+    .badge-multiple { background-color: #fce7f3; color: #be185d; }
+
+    /* Scenario Styling */
+    .scenario-box {
+        background-color: #f8fafc;
+        border-left: 4px solid #2563eb;
+        border-radius: 6px;
+        padding: 14px 18px;
+        margin-bottom: 18px;
+        font-size: 0.95em;
+        line-height: 1.6;
+        color: #334155;
+    }
+    .scenario-box b {
+        color: #0f172a;
+    }
+
+    #question-text {
+        font-size: 1.12em;
+        line-height: 1.6;
+        font-weight: 600;
+        margin-top: 0;
+        color: #0f172a;
+    }
+    #options-list {
+        list-style: none;
+        padding: 0;
+        margin: 18px 0 0 0;
+    }
+    .option {
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+        font-size: 0.96em;
+        line-height: 1.45;
+    }
+    .option input {
+        margin-right: 14px;
+        transform: scale(1.3);
+        pointer-events: none;
+    }
+    .option:hover:not(.no-hover) {
+        background-color: #f1f5f9;
+        border-color: #2563eb;
+    }
+    .option.selected {
+        background-color: #eff6ff;
+        border-color: #2563eb;
+    }
+    .option.correct {
+        background-color: #dcfce7 !important;
+        border-color: #16a34a !important;
+        color: #14532d;
+        font-weight: 600;
+    }
+    .option.incorrect {
+        background-color: #fee2e2 !important;
+        border-color: #dc2626 !important;
+        color: #7f1d1d;
+    }
+    .nav-btn {
+        color: white;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95em;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .nav-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    /* Paper Selection Grid */
+    #paper-selection-container {
+        padding: 40px 25px;
+        text-align: center;
+    }
+    #paper-selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 20px;
+        margin-top: 25px;
+        padding: 0 10px;
+    }
+    .paper-item {
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 22px 16px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-align: center;
+    }
+    .paper-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        border-color: #2563eb;
+    }
+    .paper-item h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.15em;
+        color: #0f172a;
+    }
+    .paper-item p {
+        margin: 0;
+        font-size: 0.88em;
+        color: #64748b;
+    }
+
+    #navigation-palette {
+        padding: 15px 25px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+        gap: 8px;
+        border-top: 1px solid #e2e8f0;
+        background-color: #ffffff;
+    }
+    .nav-box {
+        height: 38px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 6px;
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    .nav-box.current {
+        border: 2px solid #2563eb;
+        background-color: #eff6ff;
+        color: #2563eb;
+    }
+    .nav-box.answered-correct {
+        background-color: #16a34a;
+        color: white;
+        border-color: #16a34a;
+    }
+    .nav-box.answered-incorrect {
+        background-color: #dc2626;
+        color: white;
+        border-color: #dc2626;
+    }
+
+    #feedback {
+        background-color: #f8fafc;
+        border-left: 5px solid #2563eb;
+        padding: 18px 22px;
+        margin: 0 25px 15px 25px;
+        border-radius: 6px;
+        line-height: 1.6;
+    }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div id="header">
+        <h2>IT3070 - Information Assurance & Security (Nov 2022)</h2>
+        <div id="timer" style="display: none;">00:00</div>
+    </div>
+    
+    <div id="paper-selection-container">
+        <h3 style="margin-top:0;">Select a Question Section to Practice:</h3>
+        <p style="color: #64748b;">(Based on 2022 SLIIT IAS Final Examination Scenarios)</p>
+        <div id="paper-selection-grid"></div>
+    </div>
+
+    <div id="quiz-content" style="display: none;">
+        <div id="question-area">
+            <span id="question-badge" class="badge"></span>
+            <div id="scenario-container" class="scenario-box" style="display: none;"></div>
+            <p id="question-text"></p>
+            <ul id="options-list"></ul>
+            <button id="submit-multi-btn" class="nav-btn" style="margin-top: 18px; background-color: #2563eb; display: none;">Submit Answer</button>
+        </div>
+
+        <div id="feedback" style="display: none;">
+            <div id="explanation-text"></div>
+        </div>
+
+        <div id="navigation-palette"></div>
+
+        <div id="footer" style="padding: 16px 25px; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button id="back-btn" class="nav-btn" style="background-color: #64748b;">Previous</button>
+            <span id="progress-text" style="font-weight: 600; color: #475569;"></span>
+            <button id="next-btn" class="nav-btn" style="background-color: #16a34a;">Next</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ---------- EXAM DATA (IT3070 2022 NOVEMBER COMPLETE PAPER) ----------
+const fullQuizData = [
+    /* ---------------- PART 1: Question 1 (Ceycorp Incident, Cryptanalysis, CIA Triad) ---------------- */
+    {
+        paper: 1,
+        scenario: "<b>Security Breach Report:</b><br>\"Ceycorp Ltd. financial database server was penetrated by a group of anonymous hackers yesterday. The damage is believed to be in the region of $100,000. Cyber forensics team reported that attackers used an HTML code via a cleverly crafted URL to penetrate the SQL Master Data Services (SQL MSD). The team identified a major weakness in SQL MSD allowing arbitrary code injection using 'cross site scripting' (XSS). The report suggests that server fails to properly sanitize user-supplied input.\"",
+        question: "Based on the security breach report, correctly identify the Asset, Vulnerability, and Threat in this incident:",
+        type: "single",
+        options: [
+            "Asset: SQL MSD weakness; Vulnerability: $100,000 financial loss; Threat: HTML URL link.",
+            "Asset: Financial database server / SQL Master Data Services; Vulnerability: Failure to properly sanitize user-supplied input (XSS flaw); Threat: Group of anonymous hackers.",
+            "Asset: Anonymous hackers; Vulnerability: Financial database; Threat: Cross Site Scripting.",
+            "Asset: Cyber forensics team; Vulnerability: Database downtime; Threat: Unpatched operating system."
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>• <b>Asset (වටිනා සම්පත):</b> ආයතනයේ Financial Database Server / SQL Master Data Services (සහ එහි ඇති සංවේදී මූල්‍ය දත්ත).<br>• <b>Vulnerability (දුර්වලතාවය):</b> පරිශීලක input නිසි පරිදි sanitize නොකිරීම නිසා ඇතිවූ XSS දුර්වලතාවය (Failure to properly sanitize user-supplied input).<br>• <b>Threat (තර්ජනය):</b> පද්ධතියට පහර දුන් නොදන්නා හැකර් කණ්ඩායම (Group of anonymous hackers)."
+    },
+    {
+        paper: 1,
+        scenario: "<b>Ceycorp Ltd. Incident Countermeasures:</b><br>The server was compromised due to input validation failures allowing Cross-Site Scripting (XSS) injection.",
+        question: "Suggest the most suitable countermeasures Ceycorp Ltd. should implement to prevent similar attacks in the future. (Select 2)",
+        type: "multiple",
+        options: [
+            "Implement strict server-side Input Validation, Data Sanitization, and Context-aware Output Encoding.",
+            "Deploy a Web Application Firewall (WAF) configured with rules to detect and block malicious XSS scripts.",
+            "Increase the physical lock security on the server room racks.",
+            "Format the hard drives and disable remote administrative connections completely."
+        ],
+        correct: [0, 1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>XSS ප්‍රහාර වළක්වා ගැනීමට මූලිකවම <b>Server-side Input Validation & Sanitization</b> (ඇතුළත් කරන දත්ත පිරිසිදු කිරීම/Output encoding) කළ යුතුය. තවද වෙබ් යෙදුම් මට්ටමේදී ප්‍රහාර පෙරීමට <b>Web Application Firewall (WAF)</b> එකක් යෙදීම සුදුසුම තාක්ෂණික පියවර වේ."
+    },
+    {
+        paper: 1,
+        scenario: "<b>Ciphertext Extract:</b><br><code>\"giuifg cei iprc tpnn du cei qpreni.\"</code><br>This message was generated using a general mono-alphabetic substitution cipher.",
+        question: "What is the keyspace complexity of a systematic brute-force approach to cryptanalyze this general substitution cipher text?",
+        type: "single",
+        options: [
+            "26 possible keys ($26$)",
+            "26 factorial keys ($26! \\approx 4.03 \\times 10^{26}$)",
+            "$2^{26}$ keys",
+            "100,000 keys"
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>සාමාන්‍ය Substitution Cipher එකකදී ඉංග්‍රීසි හෝඩියේ අකුරු 26 ඕනෑම අනුපිළිවෙලකට ආදේශ (permute) කළ හැක. එබැවින් හැකි මුළු යතුරු සංඛ්‍යාව (Keyspace Complexity) වන්නේ <b>26! (26 factorial)</b> වේ (එය දළ වශයෙන් $4.03 \\times 10^{26}$ ක අතිශය දැවැන්ත අගයකි)."
+    },
+    {
+        paper: 1,
+        scenario: "<b>Alternative Scenario:</b><br>Suppose the same ciphertext <code>\"giuifg cei iprc tpnn du cei qpreni.\"</code> was generated using a simple <b>Shift-Cipher</b> (Caesar cipher).",
+        question: "What would be the complexity of a systematic brute-force approach in this case?",
+        type: "single",
+        options: [
+            "26 possible shift values ($K \\in [0, 25]$)",
+            "$26!$ possible keys",
+            "$2^{128}$ combinations",
+            "Infinite complexity"
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Shift Cipher (Caesar cipher) එකකදී හෝඩිය මාරු කළ හැකි මුළු අවස්ථා ගණන 26ක් පමණි ($K = 0, 1, 2, \\dots, 25$). එබැවින් Brute-force complexity එක වන්නේ <b>26</b> (හෝ යතුර 0 හැර 25) කි."
+    },
+    {
+        paper: 1,
+        scenario: "<b>Cryptanalysis Strategy:</b><br>A brute-force attack on a general substitution cipher ($26!$) is computationally infeasible.",
+        question: "Propose the most computationally feasible cryptanalysis approach to break this general substitution cipher text:",
+        type: "single",
+        options: [
+            "Birthday Attack",
+            "Frequency Analysis (examining single letter, digraph like 'ce'->'th', and word frequencies)",
+            "Rainbow Table Hash Collision",
+            "Side-channel Power Analysis"
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Substitution cipher එකක් බිඳ දැමීමට ඇති හොඳම සහ පහසුම ක්‍රමය <b>Frequency Analysis (සංඛ්‍යාත විශ්ලේෂණය)</b> වේ. මෙහි 'cei' වැනි වචන නැවත නැවත යෙදෙන බැවින් එය 'the' ලෙසත්, බහුලව යෙදෙන අකුරු සංඛ්‍යාතය ඉංග්‍රීසි භාෂාවේ සාමාන්‍ය අකුරු සංඛ්‍යාත (E, T, A, O, N) සමඟ සංසන්දනය කර පහසුවෙන් decrypt කළ හැක."
+    },
+    {
+        paper: 1,
+        scenario: "<b>SLIIT Academic Platforms & CIA Triad:</b><br>Evaluate the highest priority security requirement (Confidentiality, Integrity, or Availability) for the given assets.",
+        question: "Match each information asset with its HIGHEST priority requirement in the CIA triad:<br>1. NetExam server during mid-term exam<br>2. Lecturer File server holding final exam papers & marking guides<br>3. Student Information Management System (SIMS) holding grades/GPA<br>4. User password hash database in IT Services",
+        type: "single",
+        options: [
+            "1: Integrity, 2: Availability, 3: Confidentiality, 4: Integrity",
+            "1: Availability, 2: Confidentiality, 3: Integrity, 4: Confidentiality",
+            "1: Confidentiality, 2: Integrity, 3: Availability, 4: Availability",
+            "1: Availability, 2: Integrity, 3: Confidentiality, 4: Integrity"
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>1. <b>NetExam server during exam:</b> විභාගය පැවැත්වෙන මොහොතේ පද්ධතිය බිඳනොවැටී තිබිය යුතු බැවින් <b>Availability</b> ප්‍රමුඛ වේ.<br>2. <b>Exam papers & Marking schemes:</b> විභාගයට පෙර ප්‍රශ්න පත්‍ර පිටවීම වැළැක්වීමට <b>Confidentiality</b> ප්‍රමුඛ වේ.<br>3. <b>Grades & GPA system:</b> ලකුණු අනවසරයෙන් වෙනස් නොවීම තහවුරු කිරීමට <b>Integrity</b> ප්‍රමුඛ වේ.<br>4. <b>Password hash database:</b> මුරපද රහසිගතව තබාගත යුතු බැවින් <b>Confidentiality</b> ප්‍රමුඛ වේ."
+    },
+
+    /* ---------------- PART 2: Question 2 (Controls, Quantitative Risk Analysis, Shannon's Principles) ---------------- */
+    {
+        paper: 2,
+        scenario: "<b>Controls Classification:</b><br>• Type: Technical, Physical, Administrative<br>• Objective: Preventive, Detective, Corrective, Deterrent",
+        question: "Correctly classify the following security scenario: <i>'Using file integrity checking software (e.g., Tripwire/Hashing) to identify if a file has been modified during transmission.'</i>",
+        type: "single",
+        options: [
+            "Technical Control / Detective Objective",
+            "Administrative Control / Preventive Objective",
+            "Physical Control / Deterrent Objective",
+            "Technical Control / Corrective Objective"
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>මෘදුකාංග සහ Hash algorithms මඟින් සිදුවන බැවින් එය <b>Technical Control</b> එකකි. ගොනුවක් වෙනස් වී ඇත්දැයි හඳුනාගැනීම (identify/detect) අරමුණ වන බැවින් එහි පරමාර්ථය <b>Detective</b> වේ."
+    },
+    {
+        paper: 2,
+        scenario: "<b>Controls Classification:</b><br>Consider these two controls: (A) Protecting switch/router racks using a padlock, and (B) A warning banner displayed on a router CLI stating 'Unauthorized access is prohibited and prosecuted'.",
+        question: "What are the correct classifications for Control (A) and Control (B)?",
+        type: "single",
+        options: [
+            "A: Physical / Preventive ; B: Administrative (or Technical) / Deterrent",
+            "A: Technical / Detective ; B: Physical / Preventive",
+            "A: Administrative / Corrective ; B: Technical / Detective",
+            "A: Physical / Deterrent ; B: Technical / Corrective"
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>• (A) Padlock දැමීම භෞතික උපකරණයක් වන අතර අනවසර ප්‍රවේශය වළක්වන බැවින් <b>Physical / Preventive</b> වේ.<br>• (B) Warning Banner මඟින් අනතුරු අඟවා ප්‍රහාරකයා පසුබට කිරීම (discourage/dissuade) සිදුකරන බැවින් එය <b>Deterrent Objective</b> එකකි."
+    },
+    {
+        paper: 2,
+        scenario: "<b>Controls Classification:</b><br>Consider: (1) Conducting an awareness session for employees on password security, and (2) Network isolation of a PC infected by ransomware.",
+        question: "Select the correct classification pairs for (1) and (2): (Select 2)",
+        type: "multiple",
+        options: [
+            "(1) Awareness training is an Administrative Control with a Preventive Objective.",
+            "(2) Network isolation of an infected PC is a Technical Control with a Corrective Objective.",
+            "(1) Awareness training is a Physical Control with a Detective Objective.",
+            "(2) Network isolation is an Administrative Control with a Deterrent Objective."
+        ],
+        correct: [0, 1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>• Awareness session = මිනිස් හැසිරීම් පුහුණු කිරීමක් බැවින් <b>Administrative / Preventive</b> වේ.<br>• Ransomware හැදුණු PC එකක් Network එකෙන් අයින් කිරීම = හානිය පාලනය කර යථා තත්ත්වයට පත්කිරීමේ තාක්ෂණික පියවරක් බැවින් <b>Technical / Corrective</b> වේ."
+    },
+    {
+        paper: 2,
+        scenario: "<b>Quantitative Risk Analysis (Code Factory Pvt Ltd):</b><br>• Asset: Software Developing Platform Server = <b>Rs. 1,500,000/=</b><br>• Threat 1: Denial of Service (DoS) | ARO = <b>0.2</b> | Exposure Factor (EF) = <b>20%</b><br>• Threat 2: Ransomware Infection | ARO = <b>0.3</b> | Exposure Factor (EF) = <b>15%</b>",
+        question: "Calculate the Annual Loss Expectancy (ALE) for the Denial of Service (DoS) attack on this server:",
+        type: "single",
+        options: [
+            "Rs. 300,000/=",
+            "Rs. 60,000/=",
+            "Rs. 45,000/=",
+            "Rs. 150,000/="
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>ගණනය කිරීමේ පියවර:<br>1. $\\text{Single Loss Expectancy (SLE)} = \\text{Asset Value} \\times \\text{EF} = 1,500,000 \\times 0.20 = \\text{Rs. } 300,000/=$<br>2. $\\text{Annual Loss Expectancy (ALE)} = \\text{SLE} \\times \\text{ARO} = 300,000 \\times 0.2 = \\mathbf{Rs.\\ 60,000/=}$"
+    },
+    {
+        paper: 2,
+        scenario: "<b>Quantitative Risk Analysis (Code Factory Pvt Ltd):</b><br>• Asset Value = <b>Rs. 1,500,000/=</b><br>• Ransomware Infection: ARO = <b>0.3</b> | Exposure Factor (EF) = <b>15%</b>",
+        question: "Calculate the Annual Loss Expectancy (ALE) for the Ransomware attack on this server:",
+        type: "single",
+        options: [
+            "Rs. 225,000/=",
+            "Rs. 67,500/=",
+            "Rs. 60,000/=",
+            "Rs. 450,000/="
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>ගණනය කිරීමේ පියවර:<br>1. $\\text{Single Loss Expectancy (SLE)} = 1,500,000 \\times 0.15 = \\text{Rs. } 225,000/=$<br>2. $\\text{Annual Loss Expectancy (ALE)} = \\text{SLE} \\times \\text{ARO} = 225,000 \\times 0.3 = \\mathbf{Rs.\\ 67,500/=}$"
+    },
+    {
+        paper: 2,
+        scenario: "<b>Block Cipher Design:</b><br>According to Claude Shannon, modern symmetric ciphers rely on two fundamental principles to thwart statistical cryptanalysis.",
+        question: "What are the TWO primary principles of block ciphers according to Claude Shannon? (Select 2)",
+        type: "multiple",
+        options: [
+            "Diffusion (spreading the influence of individual plaintext digits over many ciphertext digits)",
+            "Confusion (making the relationship between the key and the ciphertext as complex as possible)",
+            "Asymmetry (using distinct keys for encryption and decryption)",
+            "Authentication (generating a certificate revocation list)"
+        ],
+        correct: [0, 1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Claude Shannon විසින් හඳුන්වා දුන් Block Cipher මූලධර්ම දෙක වන්නේ:<br>1. <b>Confusion:</b> Ciphertext එක සහ Key එක අතර ඇති සම්බන්ධතාවය අතිශය සංකීර්ණ කිරීම (S-boxes මඟින් Substitution කිරීම).<br>2. <b>Diffusion:</b> Plaintext එකේ එක් අකුරක් වෙනස් කළ විට Ciphertext එක පුරා විශාල වෙනසක් ඇති කිරීම (Permutation/P-boxes මඟින්)."
+    },
+
+    /* ---------------- PART 3: Question 3 (MAC Verification, Digital Certificates, Access Matrix) ---------------- */
+    {
+        paper: 3,
+        scenario: "<b>Message Authentication Code (MAC) Setup:</b><br>Bob sends message $x$ along with tag $m = \\text{MAC}(k, x)$ to Alice across the network. Alice verifies by computing $m' = \\text{MAC}(k, x)$ and checking if $m \\stackrel{?}{=} m'$. Both share secret key $k$.",
+        question: "Which cryptographic function can be employed to achieve the MAC function illustrated in this setup?",
+        type: "single",
+        options: [
+            "HMAC (e.g., HMAC-SHA256) or CBC-MAC",
+            "Asymmetric RSA with Public key",
+            "Diffie-Hellman Key Exchange without hashing",
+            "Caesar Shift Cipher"
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>රහස් යතුරක් (shared key $k$) සහ පණිවිඩයක් ($x$) එකතු කර MAC අගයක් සෑදීම සඳහා <b>HMAC (Hash-based Message Authentication Code)</b> හෝ <b>CBC-MAC</b> (Block cipher පාදක කරගත්) භාවිතා කරනු ලැබේ."
+    },
+    {
+        paper: 3,
+        scenario: "<b>MAC Security Evaluation:</b><br>Alice and Bob share a single symmetric secret key $k$ to compute and verify the MAC tag $m$.",
+        question: "Evaluate which security requirements are achieved by this shared-key MAC setup:<br>1. Message Integrity<br>2. Message Non-Repudiation<br>3. Message Authentication",
+        type: "single",
+        options: [
+            "1: YES, 2: YES, 3: YES",
+            "1: YES, 2: NO, 3: YES",
+            "1: NO, 2: YES, 3: NO",
+            "1: YES, 2: NO, 3: NO"
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>• <b>Message Integrity: YES</b> (මඟදී දත්ත වෙනස් වුවහොත් MAC එක නොගැලපේ).<br>• <b>Message Authentication: YES</b> (යතුර $k$ දන්නේ Bob සහ Alice පමණක් බැවින් පණිවිඩය ආවේ ඔවුන්ගෙන් බව තහවුරු වේ).<br>• <b>Non-Repudiation: NO</b> (යතුර $k$ දෙදෙනාම ළඟ ඇති බැවින්, Bob ට පුළුවන් 'මේක මම නෙවෙයි Alice තනියම හදාගත්ත එකක්' කියා ප්‍රතික්ෂේප කරන්න. Non-repudiation සඳහා Asymmetric Digital Signatures අවශ්‍ය වේ)."
+    },
+    {
+        paper: 3,
+        scenario: "<b>Digital Certificate Verification in HTTPS:</b><br>John has obtained a digital certificate from a Certificate Authority (CA). During the HTTPS TLS handshake, John presents his certificate to Sally.",
+        question: "Which key belonging to which entity can Sally verify using this presented digital certificate?",
+        type: "single",
+        options: [
+            "The CA's Private Key belonging to the CA",
+            "John's Public Key belonging to John",
+            "Sally's Private Key belonging to Sally",
+            "John's Private Key belonging to John"
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>ඩිජිටල් සහතිකයක (Digital Certificate) මූලික අරමුණ වන්නේ පුද්ගලයෙකුගේ හෝ සේවාදායකයක අනන්‍යතාවය ඔහුගේ Public Key එක සමඟ බැඳ තැබීමයි (Binding identity to public key). එබැවින් Sally විසින් CA හි Public key එක මඟින් සහතිකය පරීක්ෂා කර <b>John's Public Key</b> එක නිවැරදිව තහවුරු කර ගනී."
+    },
+    {
+        paper: 3,
+        scenario: "<b>Access Control Matrix:</b><br><table border='1' cellpadding='4' style='border-collapse:collapse; background:#fff; margin-top:8px;'><tr><th></th><th>File A</th><th>File B</th><th>File C</th></tr><tr><td><b>Alice</b></td><td>RW</td><td>RW</td><td>RW</td></tr><tr><td><b>Bob</b></td><td>-</td><td>R</td><td>-</td></tr><tr><td><b>Carol</b></td><td>RW</td><td>-</td><td>-</td></tr></table>",
+        question: "Based on the matrix above, what is the correct Access Control List (ACL) for <b>File B</b>?",
+        type: "single",
+        options: [
+            "File B: {(Alice, RW), (Bob, R)}",
+            "File B: {(Alice, RW), (Carol, RW)}",
+            "File B: {(Bob, RW), (Carol, R)}",
+            "File B: {(Alice, R), (Bob, W), (Carol, RW)}"
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Access Control List (ACL) එකක් යනු Matrix එකේ අදාළ තීරුව (Column - Object) ඔස්සේ බලන ලැයිස්තුවයි. File B තීරුව බැලූ විට:<br>• Alice $\\rightarrow$ RW<br>• Bob $\\rightarrow$ R<br>• Carol $\\rightarrow$ No access<br>එබැවින් ACL for File B = <b>{(Alice, RW), (Bob, R)}</b>."
+    },
+    {
+        paper: 3,
+        scenario: "<b>Access Control Matrix:</b><br><table border='1' cellpadding='4' style='border-collapse:collapse; background:#fff; margin-top:8px;'><tr><th></th><th>File A</th><th>File B</th><th>File C</th></tr><tr><td><b>Alice</b></td><td>RW</td><td>RW</td><td>RW</td></tr><tr><td><b>Bob</b></td><td>-</td><td>R</td><td>-</td></tr><tr><td><b>Carol</b></td><td>RW</td><td>-</td><td>-</td></tr></table>",
+        question: "Based on the matrix above, what is the correct <b>Capability Ticket</b> for <b>Bob</b>?",
+        type: "single",
+        options: [
+            "Bob: {(File A, RW), (File B, R), (File C, RW)}",
+            "Bob: {(File B, R)}",
+            "Bob: {(File A, R), (File C, R)}",
+            "Bob: {(File B, RW)}"
+        ],
+        correct: [1],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Capability Ticket එකක් යනු Matrix එකේ අදාළ පේළිය (Row - Subject) ඔස්සේ පරිශීලකයා සතු අවසර ලැයිස්තුගත කිරීමයි. Bob ගේ පේළිය බැලූ විට ඔහුට ඇත්තේ File B සඳහා Read (R) අවසරය පමණි. එබැවින් Capability ticket for Bob = <b>{(File B, R)}</b>."
+    },
+    {
+        paper: 3,
+        scenario: "<b>Access Control Policies:</b><br>Propose the most suitable model: DAC (Discretionary), MAC (Mandatory), or RBAC (Role-Based).",
+        question: "Match the most suitable access control policy to each scenario:<br>1. Military information system for classified intelligence<br>2. Online learning platform with Students, Lecturers & Admins<br>3. Standard UNIX & Windows desktop OS with multiple users",
+        type: "single",
+        options: [
+            "1: MAC, 2: RBAC, 3: DAC",
+            "1: DAC, 2: MAC, 3: RBAC",
+            "1: RBAC, 2: DAC, 3: MAC",
+            "1: MAC, 2: DAC, 3: RBAC"
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>1. <b>Military system:</b> දැඩි Clearance labels පවතින බැවින් <b>MAC (Mandatory Access Control)</b>.<br>2. <b>LMS (Students, Lecturers):</b> පරිශීලකයන්ගේ තනතුරු/කාර්යභාරය අනුව අවසර දෙන බැවින් <b>RBAC (Role-Based Access Control)</b>.<br>3. <b>UNIX / Windows desktop:</b> ෆයිල් අයිතිකරුට (Owner) කැමති අයට අවසර ලබාදිය හැකි බැවින් <b>DAC (Discretionary Access Control)</b>."
+    },
+
+    /* ---------------- PART 4: Question 4 (Authentication, Challenge-Response, Firewalls, DRP vs BCP) ---------------- */
+    {
+        paper: 4,
+        scenario: "<b>Authentication Factors:</b><br>Authentication is based on: (1) Something you know, (2) Something you possess, (3) Something you do, (4) Something you are.",
+        question: "Select the correct examples corresponding to (1) Something you know, (2) Something you possess, (3) Something you do, and (4) Something you are: (Select all that are true)",
+        type: "multiple",
+        options: [
+            "Something the individual knows: Passwords, PINs, or Secret passphrases.",
+            "Something the individual possesses: Smart cards, Hardware OTP tokens, or USB keys.",
+            "Something the individual does: Dynamic voice recognition cadence or Keystroke typing dynamics.",
+            "Something the individual is: Physical biometrics such as Fingerprints, Iris scans, or Facial structure."
+        ],
+        correct: [0, 1, 2, 3],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>සියලුම කරුණු නිවැරදියි:<br>• <b>Knows:</b> Password / PIN.<br>• <b>Possesses:</b> Smart Card / Hardware Token.<br>• <b>Does:</b> Keystroke dynamics / Voice rhythm (චර්යාත්මක ලක්ෂණ).<br>• <b>Is:</b> Fingerprint / Retina / Iris (භෞතික ජෛවමිතික ලක්ෂණ)."
+    },
+    {
+        paper: 4,
+        scenario: "<b>Remote Authentication Protocol:</b><br>Remote authentication over untrusted networks is vulnerable to eavesdropping and replay attacks.",
+        question: "How does a Challenge-Response protocol (using a Nonce) successfully prevent Replay Attacks?",
+        type: "single",
+        options: [
+            "The server sends a fresh pseudo-random number (Nonce/Challenge) each session; the client encrypts/hashes it with their secret key. Because the nonce is never reused, eavesdropped responses cannot be replayed.",
+            "The client sends their cleartext password repeatedly until the server acknowledges.",
+            "The protocol disables all incoming TCP packets on Port 80.",
+            "The server shares its root private key with every remote client."
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Challenge-Response ක්‍රමයේදී Server එක විසින් සෑම පිවිසුමකදීම නැවත කිසිදා භාවිතා නොවන අහඹු අගයක් (Nonce/Challenge $R$) එවයි. Client විසින් තම රහස් යතුරෙන් එය Encrypt කර හෝ Hash කර ආපසු එවයි ($f(K, R)$). හැකර්වරයෙකු මෙම ප්‍රතිචාරය Record කරගෙන පසුව නැවත එව්වද (Replay attack), ඊළඟ වතාවේ Server එක වෙනස් Nonce එකක් එවන බැවින් පැරණි ප්‍රතිචාරයෙන් ඇතුළු විය නොහැක."
+    },
+    {
+        paper: 4,
+        scenario: "<b>Firewall Rule Table Analysis:</b><br><table border='1' cellpadding='4' style='border-collapse:collapse; background:#fff; font-size:0.9em; margin-top:8px;'><tr><th>No.</th><th>Protocol</th><th>Source IP</th><th>Destination IP</th><th>Dest. Port</th><th>Action</th></tr><tr><td>1</td><td>TCP</td><td>10.1.1.1</td><td>20.1.1.1</td><td>80</td><td>Accept</td></tr><tr><td>2</td><td>TCP</td><td>10.1.1.2</td><td>20.1.1.1</td><td>80</td><td>Deny</td></tr><tr><td>3</td><td>TCP</td><td>10.1.1.0/24</td><td>20.1.1.1</td><td>80</td><td>Deny</td></tr><tr><td>4</td><td>TCP</td><td>10.1.1.3</td><td>20.1.1.1</td><td>80</td><td>Accept</td></tr><tr><td>9</td><td>IP</td><td>0.0.0.0/0</td><td>0.0.0.0/0</td><td>0-65535</td><td>Deny</td></tr></table>",
+        question: "Why is Rule Number 3 placed AFTER Rule Number 1, and what happens to Rule Number 4?",
+        type: "single",
+        options: [
+            "Rule 1 is an exception allowing 10.1.1.1; if Rule 3 (blocking the whole /24 subnet) was placed first, Rule 1 would never be evaluated (Shadowed). Rule 4 is dead/shadowed because Rule 3 blocks it first.",
+            "Rule order does not matter in packet filtering firewalls; all rules evaluate simultaneously.",
+            "Rule 3 speeds up internet bandwidth for host 10.1.1.3.",
+            "Rule 4 overrides Rule 3 automatically because Accept takes precedence over Deny."
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Firewall rules ක්‍රියාත්මක වන්නේ ඉහළ සිට පහළට (Top-to-Bottom, First-match principle) ය.<br>• Rule 3 මඟින් මුළු 10.1.1.0/24 subnet එකම Deny කරයි. Rule 1 (10.1.1.1 ට Accept දීම) ඉහළින් තැබුවේ එයට විශේෂ අවසරයක් (Exception) දීමටයි.<br>• Rule 4 (10.1.1.3 Accept) ඇත්තේ Rule 3 ට පහළින් බැවින් එය කිසිදා ක්‍රියාත්මක නොවේ (Shadowed / Dead rule)."
+    },
+    {
+        paper: 4,
+        scenario: "<b>Firewall Rule Table:</b><br>Rule 9 states: <code>Protocol: IP | Source: 0.0.0.0/0 | Dest: 0.0.0.0/0 | Port: 0-65535 | Action: Deny</code>",
+        question: "What is the standard cybersecurity name given to Rule Number 9?",
+        type: "single",
+        options: [
+            "Default Deny Rule (or Implicit Deny / Cleanup Rule)",
+            "Stateful Bypass Rule",
+            "Intrusion Detection Trigger",
+            "Permissive Catch-all Rule"
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Firewall එකක අවසානයටම දමන, ඉහත කිසිදු රීතියකට නොගැළපෙන සියලුම පැකට් අවහිර කරන රීතිය <b>Default Deny (හෝ Implicit Deny / Cleanup Rule)</b> ලෙස හඳුන්වයි."
+    },
+    {
+        paper: 4,
+        scenario: "<b>Protecting the Firewall Appliance:</b><br>10.1.1.254 is the internal IP address of the firewall appliance itself.",
+        question: "To protect the firewall from unauthorized direct connections, which rule should be implemented and where should it be placed?",
+        type: "single",
+        options: [
+            "A rule denying all unauthorized traffic destined for 10.1.1.254, placed at the very top (Rule 0 or before general rules).",
+            "A rule accepting all traffic to 10.1.1.254 placed after Rule 9.",
+            "No rule is needed because firewalls cannot be attacked via IP.",
+            "A rule blocking outgoing traffic from 0.0.0.0/0 placed in the middle."
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>Firewall එක වෙත එන අනවසර ප්‍රහාර (Brute force SSH, Web admin attacks) වැළැක්වීමට Destination IP = 10.1.1.254 වන පැකට් (විශ්වාසදායක පරිපාලක IP හැර) Deny කරන රීතියක් සකසා එය ලැයිස්තුවේ <b>ඉහළින්ම (At the very top)</b> ස්ථානගත කළ යුතුය."
+    },
+    {
+        paper: 4,
+        scenario: "<b>BCP vs DRP:</b><br>Differentiate between 'Disaster Recovery' (DR) and 'Business Continuity' (BC) in information assurance.",
+        question: "Which statement correctly distinguishes between Business Continuity Planning (BCP) and Disaster Recovery Planning (DRP)?",
+        type: "single",
+        options: [
+            "BCP focuses on maintaining critical business operations and services during and immediately after a disruption; DRP focuses on restoring and recovering specific IT infrastructure, servers, and data after a disaster occurs.",
+            "BCP only deals with data backups; DRP deals with human resource payroll.",
+            "DRP happens before the disaster; BCP happens years after the disaster.",
+            "Both terms refer identically to offsite tape storage rotation."
+        ],
+        correct: [0],
+        explanation: "<b>සිංහල පැහැදිලි කිරීම:</b><br>• <b>Business Continuity (BCP):</b> ආපදාවක් පවතින අතරතුරදී පවා ව්‍යාපාරයේ අත්‍යවශ්‍ය සේවාවන් බිඳනොවැටී අඛණ්ඩව පවත්වාගෙන යාම කෙරෙහි අවධානය යොමු කරයි (Broader, operational focus).<br>• <b>Disaster Recovery (DRP):</b> ආපදාවකින් පසු හානි වූ IT පද්ධති, දත්ත සහ Servers නැවත යථා තත්ත්වයට පත් කිරීම (Technical recovery focus) කෙරෙහි අවධානය යොමු කරයි."
+    }
+];
+
+// ---------- APPLICATION LOGIC ----------
+const questionBadgeEl = document.getElementById('question-badge');
+const scenarioContainerEl = document.getElementById('scenario-container');
+const questionTextEl = document.getElementById('question-text');
+const optionsListEl = document.getElementById('options-list');
+const nextBtn = document.getElementById('next-btn');
+const backBtn = document.getElementById('back-btn');
+const progressTextEl = document.getElementById('progress-text');
+const timerEl = document.getElementById('timer');
+const navPaletteEl = document.getElementById('navigation-palette');
+const quizContentEl = document.getElementById('quiz-content');
+const paperSelectionContainerEl = document.getElementById('paper-selection-container');
+const paperSelectionGridEl = document.getElementById('paper-selection-grid');
+const feedbackEl = document.getElementById('feedback');
+const explanationTextEl = document.getElementById('explanation-text');
+const submitMultiBtn = document.getElementById('submit-multi-btn');
+
+const TOTAL_PAPERS = 4;
+const quizTimeInMinutes = 30; 
+
+let currentPaperData = [];
+let currentPaperIndex = 0;
+let timeRemaining = quizTimeInMinutes * 60;
+let timerInterval;
+let quizFinished = false;
+
+let currentQuestionIndex = 0;
+let allUserAnswers = new Array(fullQuizData.length).fill(null);
+let tempSelectedOptions = [];
+
+function startTimer() {
+    timerEl.style.display = 'inline-block';
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (quizFinished) return;
+    timeRemaining--;
+    const minutes = Math.floor(timeRemaining / 60);
+    let seconds = timeRemaining % 60;
+
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+
+    timerEl.innerText = `${minutesStr}:${seconds}`;
+
+    if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        showResults(true); 
+    }
+}
+
+function loadPaper(paperNumber) {
+    currentPaperIndex = paperNumber - 1;
+    currentPaperData = fullQuizData.filter(q => q.paper === paperNumber);
+
+    paperSelectionContainerEl.style.display = 'none';
+    quizContentEl.style.display = 'block';
+
+    currentQuestionIndex = 0;
+    renderNavigationPalette();
+    loadQuestion();
+    startTimer();
+}
+
+function renderPaperSelection() {
+    const titles = [
+        "Question 1: Ceycorp Breach, Cryptanalysis & CIA Triad",
+        "Question 2: Controls, Quantitative Risk Analysis (ALE) & Shannon",
+        "Question 3: MAC Verification, Digital Certs & Access Matrix",
+        "Question 4: Authentication, Challenge-Response & Firewalls"
+    ];
+
+    for (let i = 0; i < TOTAL_PAPERS; i++) {
+        const count = fullQuizData.filter(q => q.paper === i + 1).length;
+        const paperItem = document.createElement('div');
+        paperItem.classList.add('paper-item');
+        paperItem.dataset.paperNumber = i + 1;
+        paperItem.innerHTML = `
+            <h4>Section ${i + 1}</h4>
+            <p style="font-weight:600; color:#0f172a; margin-bottom:6px;">${titles[i]}</p>
+            <p>${count} Exam Scenarios</p>
+        `;
+        paperItem.addEventListener('click', (e) => {
+            loadPaper(parseInt(e.currentTarget.dataset.paperNumber));
+        });
+        paperSelectionGridEl.appendChild(paperItem);
+    }
+}
+
+function getGlobalIndex(paperIdx, questionIdx) {
+    let offset = 0;
+    for (let p = 0; p < paperIdx; p++) {
+        offset += fullQuizData.filter(q => q.paper === p + 1).length;
+    }
+    return offset + questionIdx;
+}
+
+function renderNavigationPalette() {
+    navPaletteEl.innerHTML = '';
+    for (let i = 0; i < currentPaperData.length; i++) {
+        const navItem = document.createElement('div');
+        navItem.innerText = i + 1;
+        navItem.classList.add('nav-box');
+        navItem.dataset.index = i;
+        navItem.addEventListener('click', (e) => {
+            jumpToQuestion(parseInt(e.target.dataset.index));
+        });
+        navPaletteEl.appendChild(navItem);
+    }
+    updateNavigationPalette();
+}
+
+function updateNavigationPalette() {
+    const navItems = navPaletteEl.children;
+
+    for (let i = 0; i < navItems.length; i++) {
+        const item = navItems[i];
+        const globalIndex = getGlobalIndex(currentPaperIndex, i);
+        item.classList.remove('current', 'answered-correct', 'answered-incorrect');
+
+        const answer = allUserAnswers[globalIndex];
+
+        if (answer !== null) {
+            const currentQ = fullQuizData[globalIndex];
+            const isCorrect = isAnswerCorrect(answer, currentQ.correct);
+            if (isCorrect) {
+                item.classList.add('answered-correct');
+            } else {
+                item.classList.add('answered-incorrect');
+            }
+        }
+        
+        if (i === currentQuestionIndex) {
+            item.classList.add('current');
+        }
+    }
+}
+
+function isAnswerCorrect(userAns, correctAns) {
+    if (!Array.isArray(userAns)) return false;
+    if (userAns.length !== correctAns.length) return false;
+    const sortedUser = [...userAns].sort();
+    const sortedCorrect = [...correctAns].sort();
+    return sortedUser.every((val, idx) => val === sortedCorrect[idx]);
+}
+
+function jumpToQuestion(index) {
+    if (index >= 0 && index < currentPaperData.length) {
+        currentQuestionIndex = index;
+        loadQuestion();
+    }
+}
+
+function loadQuestion() {
+    const currentQuestion = currentPaperData[currentQuestionIndex];
+    const globalQuestionIndex = getGlobalIndex(currentPaperIndex, currentQuestionIndex);
+    const currentSavedAnswer = allUserAnswers[globalQuestionIndex];
+
+    // Show Scenario if available
+    if (currentQuestion.scenario) {
+        scenarioContainerEl.innerHTML = currentQuestion.scenario;
+        scenarioContainerEl.style.display = 'block';
+    } else {
+        scenarioContainerEl.style.display = 'none';
+    }
+
+    questionTextEl.innerHTML = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+    optionsListEl.innerHTML = '';
+    feedbackEl.style.display = 'none';
+    submitMultiBtn.style.display = 'none';
+
+    if (currentQuestion.type === 'multiple') {
+        questionBadgeEl.innerText = "Multiple Answers (Select all that apply)";
+        questionBadgeEl.className = "badge badge-multiple";
+    } else {
+        questionBadgeEl.innerText = "Single Choice";
+        questionBadgeEl.className = "badge badge-single";
+    }
+
+    backBtn.disabled = currentQuestionIndex === 0;
+    nextBtn.innerText = (currentQuestionIndex === currentPaperData.length - 1) ? 'Finish Section' : 'Next';
+    nextBtn.disabled = (currentSavedAnswer === null && currentQuestionIndex < currentPaperData.length - 1);
+
+    tempSelectedOptions = currentSavedAnswer ? [...currentSavedAnswer] : [];
+
+    currentQuestion.options.forEach((optionText, idx) => {
+        const li = document.createElement('li');
+        li.classList.add('option');
+        li.dataset.index = idx;
+
+        const input = document.createElement('input');
+        input.type = currentQuestion.type === 'multiple' ? 'checkbox' : 'radio';
+        input.name = `question_${currentQuestionIndex}`;
+        input.checked = tempSelectedOptions.includes(idx);
+
+        const span = document.createElement('span');
+        span.innerHTML = optionText;
+
+        li.appendChild(input);
+        li.appendChild(span);
+
+        if (currentSavedAnswer === null) {
+            li.addEventListener('click', () => handleOptionClick(idx, currentQuestion));
+        } else {
+            li.classList.add('no-hover');
+            const isCorrect = currentQuestion.correct.includes(idx);
+            const isSelected = currentSavedAnswer.includes(idx);
+
+            if (isCorrect) li.classList.add('correct');
+            if (isSelected && !isCorrect) li.classList.add('incorrect');
+        }
+
+        optionsListEl.appendChild(li);
+    });
+
+    if (currentSavedAnswer !== null) {
+        showFeedback(currentQuestion);
+    } else if (currentQuestion.type === 'multiple') {
+        submitMultiBtn.style.display = 'inline-block';
+        submitMultiBtn.disabled = tempSelectedOptions.length === 0;
+    }
+
+    progressTextEl.innerText = `Question ${currentQuestionIndex + 1} of ${currentPaperData.length} (Section ${currentPaperIndex + 1})`;
+    updateNavigationPalette();
+}
+
+function handleOptionClick(index, question) {
+    const globalQuestionIndex = getGlobalIndex(currentPaperIndex, currentQuestionIndex);
+    if (allUserAnswers[globalQuestionIndex] !== null) return;
+
+    if (question.type === 'single') {
+        allUserAnswers[globalQuestionIndex] = [index];
+        renderOptionStatesAfterAnswer(question, [index]);
+        showFeedback(question);
+        nextBtn.disabled = false;
+        updateNavigationPalette();
+    } else {
+        const optIndex = tempSelectedOptions.indexOf(index);
+        if (optIndex > -1) {
+            tempSelectedOptions.splice(optIndex, 1);
+        } else {
+            tempSelectedOptions.push(index);
+        }
+
+        Array.from(optionsListEl.children).forEach((li, idx) => {
+            const checkbox = li.querySelector('input');
+            const isChecked = tempSelectedOptions.includes(idx);
+            checkbox.checked = isChecked;
+            if (isChecked) {
+                li.classList.add('selected');
+            } else {
+                li.classList.remove('selected');
+            }
+        });
+
+        submitMultiBtn.disabled = tempSelectedOptions.length === 0;
+    }
+}
+
+submitMultiBtn.addEventListener('click', () => {
+    const globalQuestionIndex = getGlobalIndex(currentPaperIndex, currentQuestionIndex);
+    const currentQuestion = currentPaperData[currentQuestionIndex];
+
+    allUserAnswers[globalQuestionIndex] = [...tempSelectedOptions];
+    submitMultiBtn.style.display = 'none';
+
+    renderOptionStatesAfterAnswer(currentQuestion, tempSelectedOptions);
+    showFeedback(currentQuestion);
+    nextBtn.disabled = false;
+    updateNavigationPalette();
+});
+
+function renderOptionStatesAfterAnswer(question, userSelection) {
+    Array.from(optionsListEl.children).forEach((li, idx) => {
+        li.classList.add('no-hover');
+        const isCorrect = question.correct.includes(idx);
+        const isSelected = userSelection.includes(idx);
+
+        if (isCorrect) li.classList.add('correct');
+        if (isSelected && !isCorrect) li.classList.add('incorrect');
+    });
+}
+
+function showFeedback(question) {
+    const correctTexts = question.correct.map(i => `✔ ${question.options[i]}`).join('<br>');
+    explanationTextEl.innerHTML = `
+        <div style="font-weight: bold; color: #155724; margin-bottom: 6px;">Correct Answer:</div>
+        <div style="margin-bottom: 12px; font-weight: 500; color: #14532d;">${correctTexts}</div>
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin-bottom: 10px;">
+        <div>${question.explanation}</div>
+    `;
+    feedbackEl.style.display = 'block';
+}
+
+function showResults(timeIsUp = false) {
+    quizFinished = true;
+    clearInterval(timerInterval);
+
+    let paperScore = 0;
+    for (let i = 0; i < currentPaperData.length; i++) {
+        const globalIndex = getGlobalIndex(currentPaperIndex, i);
+        if (isAnswerCorrect(allUserAnswers[globalIndex], currentPaperData[i].correct)) {
+            paperScore++;
+        }
+    }
+
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.innerHTML = `
+        <div id="header">
+            <h2>${timeIsUp ? 'Time Expired!' : 'Section Completed!'}</h2>
+        </div>
+        <div id="question-area" style="text-align: center; padding: 45px 20px;">
+            <h3 style="color: #0f172a;">Your Score for Section ${currentPaperIndex + 1}</h3>
+            <p style="font-size: 3.5em; font-weight: bold; color: #2563eb; margin: 15px 0;">${paperScore} / ${currentPaperData.length}</p>
+            <p style="font-size: 1.05em; color: #64748b;">${paperScore === currentPaperData.length ? 'Outstanding work! Full marks scored.' : 'Good effort! Review the explanations above to solidify your concepts.'}</p>
+            <button id="restart-btn" style="background-color: #2563eb; color: white; border: none; padding: 12px 28px; border-radius: 6px; cursor: pointer; font-size: 1.1em; margin-top: 20px;">Choose Another Section</button>
+        </div>
+    `;
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        location.reload();
+    });
+}
+
+nextBtn.addEventListener('click', () => {
+    if (currentQuestionIndex < currentPaperData.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+    } else {
+        showResults();
+    }
+});
+
+backBtn.addEventListener('click', () => {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        loadQuestion();
+    }
+});
+
+// Start with Paper Selection
+renderPaperSelection();
+</script>
+</body>
+</html>
